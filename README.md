@@ -1,5 +1,5 @@
 
-## Allure Marathon Example
+## Allure Cucumber Example
 
 ### Getting Started
 
