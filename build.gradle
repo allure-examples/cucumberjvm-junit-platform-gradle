@@ -1,23 +1,61 @@
 plugins {
     id 'java'
-    id("io.qameta.allure") version "2.11.2"
 }
 
-group 'org.example'
-version '1.0-SNAPSHOT'
+wrapper {
+    gradleVersion = "8.10.2"
+}
 
 repositories {
     mavenCentral()
 }
 
+group = "com.example.cucumberjvm"
+version = "1.0-SNAPSHOT"
+
+def allureVersion = "2.29.0"
+def cucumberVersion = "7.20.1"
+def aspectJVersion = "1.9.22"
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = "UTF-8"
+    options.compilerArgs.add("-parameters")
+}
+
+configurations {
+    agent {
+        canBeResolved = true
+        canBeConsumed = true
+    }
+}
+
 dependencies {
-    testImplementation 'org.junit.platform:junit-platform-suite:1.9.2'
-    testImplementation 'io.cucumber:cucumber-java:6.11.0'
-    testImplementation 'io.cucumber:cucumber-junit-platform-engine:6.11.0'
-    testImplementation 'io.qameta.allure:allure-cucumber6-jvm:2.22.1'
-    testImplementation 'org.assertj:assertj-core:3.24.2'
+    agent "org.aspectj:aspectjweaver:$aspectJVersion"
+    
+    testImplementation platform("io.cucumber:cucumber-bom:$cucumberVersion")
+    testImplementation "io.cucumber:cucumber-java"
+    testImplementation "io.cucumber:cucumber-junit-platform-engine"
+
+    testImplementation platform("io.qameta.allure:allure-bom:$allureVersion")
+    testImplementation "io.qameta.allure:allure-cucumber7-jvm"
+    testImplementation "io.qameta.allure:allure-junit-platform"
+
+    testImplementation platform("org.junit:junit-bom:5.11.3")
+    testImplementation "org.junit.platform:junit-platform-suite"
+    testImplementation "org.junit.jupiter:junit-jupiter-api"
+    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine"
+
+    testImplementation "org.slf4j:slf4j-simple:2.0.16"
 }
 
 test {
+    ignoreFailures = true
     useJUnitPlatform()
+    jvmArgs = [ "-javaagent:${configurations.agent.singleFile}" ]
 }
